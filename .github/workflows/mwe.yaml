@@ -14,10 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Start the database
-        run: |
-            set -e
-
-            mongod --port 27017 --replSet "rs0" --dbpath .
+        run: mongod --port 27017 --replSet "rs0" --dbpath . --fork
       - name: Initialize the replica set
         run: |
             set -e
