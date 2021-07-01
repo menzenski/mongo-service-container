@@ -53,7 +53,19 @@ jobs:
 
                 exit
             EOF
+      - name: Shut down the database
+        run: |
+            set -e
+
+            mongo <<EOF
+                db.adminCommand({ shutdown: 1 });
+            EOF
+      - name: Restart the database with authentication enabled
+        run: mongod --auth --port 27017 --replSet "rs0" --dbpath . --fork --syslog
       - name: Test the database
-        run: mongo mongodb://admin:password@localhost:${{ job.services.database.ports['27017'] }}/test?authSource=admin&replicaSet=rs0
+        run: |
+            set -e
+
+            mongo mongodb://admin:password@localhost:${{ job.services.database.ports['27017'] }}/test?authSource=admin&replicaSet=rs0
 
 
