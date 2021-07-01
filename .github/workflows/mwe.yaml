@@ -58,6 +58,8 @@ jobs:
             set -e
 
             mongo <<EOF
+                var adminDB = 'admin';
+                db = db.getSiblingDB(adminDB);
                 db.adminCommand({ shutdown: 1 });
             EOF
       - name: Restart the database with authentication enabled
