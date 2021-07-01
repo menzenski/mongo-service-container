@@ -14,8 +14,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Start the database
-        run: mongod --port 27017 --replSet "rs0" --dbpath . --fork --syslog
+        env:
+            MONGO_INITDB_ROOT_USERNAME: admin
+            MONGO_INITDB_ROOT_PASSWORD: password
+            MONGO_INITDB_DATABASE: admin
+        run: mongod --port ${{ job.services.database.ports['27017'] }} --replSet "rs0" --dbpath . --fork --syslog
       - name: Initialize the replica set
+        env:
+            MONGO_PORT: ${{ job.services.database.ports['27017'] }}
         run: |
             set -e
 
@@ -23,7 +29,7 @@ jobs:
                 rs.initiate({
                     _id : "rs0",
                     members: [
-                        { _id: 0, host: "localhost:27017" }
+                        { _id: 0, host: "localhost:$MONGO_PORT" }
                     ]
                 });
 
@@ -34,26 +40,9 @@ jobs:
 
                 exit
             EOF
-      - name: Create user
+      - name: Test the database
         run: |
             set -e
 
-            mongo <<EOF
-                var adminDB = 'admin';
-                var username = 'admin';
-                var password = 'password';
-
-                db = db.getSiblingDB(adminDB);
-                db.dropAllUsers();
-                db.createUser({
-                  user: username,
-                  pwd: password,
-                  roles: [ { role: 'root', db: adminDB, } ],
-                });
-
-                exit
-            EOF
-      - name: Test the database
-        run: mongo mongodb://admin:password@localhost:${{ job.services.database.ports['27017'] }}/test?authSource=admin&replicaSet=rs0
-
+            mongo mongodb://admin:password@localhost:${{ job.services.database.ports['27017'] }}/test?authSource=admin&replicaSet=rs0
 
