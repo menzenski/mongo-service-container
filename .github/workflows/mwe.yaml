@@ -13,8 +13,6 @@ jobs:
           - 27017:27017
     steps:
       - uses: actions/checkout@v2
-      - name: Start database
-        run: mongod
       - name: Test
         run: mongo mongodb://localhost:${{ job.services.database.ports['27017']  }}/test?replicaSet=rs0
 
