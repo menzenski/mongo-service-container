@@ -45,6 +45,8 @@ jobs:
                 });
 
                 exit
+
+                exit
             EOF
       - name: Test
         run: mongo mongodb://admin:password@localhost:${{ job.services.database.ports['27017'] }}/test?authSource=admin&replicaSet=rs0
