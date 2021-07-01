@@ -12,13 +12,13 @@ jobs:
         ports:
           - 27017:27017
         options: >-
-          --health-cmd "mongo 'mongodb://admin:password@localhost:27017/test?authSource=admin'"
+          --health-cmd "mongo 'mongodb://localhost:27017/test?replicaSet=rs0'"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
     steps:
       - uses: actions/checkout@v2
       - name: Test
-        run: mongo localhost:${{ job.services.database.ports['27017']  }}/test?authSource=admin&replicaSet=rs0
+        run: mongo mongodb://localhost:${{ job.services.database.ports['27017']  }}/test?replicaSet=rs0
 
 
