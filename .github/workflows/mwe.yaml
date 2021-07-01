@@ -18,6 +18,9 @@ jobs:
             set -e
 
             mongod --port 27017 --replSet "rs0" --dbpath .
+      - name: Initialize the replica set
+        run: |
+            set -e
 
             mongo <<EOF
                 rs.initiate({
@@ -32,6 +35,13 @@ jobs:
                     sleep(200);
                 }
 
+                exit
+            EOF
+      - name: Create user
+        run: |
+            set -e
+
+            mongo <<EOF
                 var adminDB = 'admin';
                 var username = 'admin';
                 var password = 'password';
@@ -45,10 +55,8 @@ jobs:
                 });
 
                 exit
-
-                exit
             EOF
-      - name: Test
+      - name: Test the database
         run: mongo mongodb://admin:password@localhost:${{ job.services.database.ports['27017'] }}/test?authSource=admin&replicaSet=rs0
 
 
