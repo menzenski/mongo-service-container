@@ -13,7 +13,36 @@ jobs:
           - 27017:27017
     steps:
       - uses: actions/checkout@v2
+      - name: Start the database
+        run: |
+            set -e
+
+            mongo <<EOF
+                rs.initiate({
+                    _id : "rs0",
+                    members: [
+                        { _id: 0, host: "localhost:27017" }
+                    ]
+                });
+
+                while (rs.status().myState !== 1) {
+                    print('sleeping...');
+                    sleep(200);
+                }
+
+                var adminDB = 'admin';
+                var username = 'admin';
+                var password = 'password';
+
+                db = db.getSiblingDB(adminDB);
+                db.dropAllUsers();
+                db.createUser({
+                  user: username,
+                  pwd: password,
+                  roles: [ { role: 'root', db: adminDB, } ],
+                });
+            EOF
       - name: Test
-        run: mongo mongodb://localhost:${{ job.services.database.ports['27017']  }}/test
+        run: mongo mongodb://admin:password@localhost:${{ job.services.database.ports['27017'] }}/test?authSource=admin&replicaSet=rs0
 
 
