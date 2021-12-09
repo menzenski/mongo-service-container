@@ -1,4 +1,4 @@
-name: MWE
+name: MongoDB Replica Set In Container In GitHub Actions
 
 on:
   - push
